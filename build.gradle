@@ -5,8 +5,8 @@ plugins {
 }
 
 group = 'com.transferwise'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+version = '0.0.1'
+sourceCompatibility = '13'
 
 configurations {
 	compileOnly {
@@ -20,6 +20,7 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
