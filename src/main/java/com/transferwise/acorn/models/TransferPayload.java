@@ -4,13 +4,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Builder;
 import lombok.ToString;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 @Builder
 @JsonSerialize
 @ToString
-public class TransferPayload implements Serializable {
+public class TransferPayload {
     final int sourceAccount;
     final int targetAccount;
     final String quoteUuid;

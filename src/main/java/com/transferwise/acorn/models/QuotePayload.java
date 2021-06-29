@@ -10,7 +10,6 @@ public class QuotePayload {
     final String sourceCurrency;
     final String targetCurrency;
     final int sourceAmount;
-    final int targetAmount;
     final int profileId;
     final String payout;
     final String preferredPayIn;

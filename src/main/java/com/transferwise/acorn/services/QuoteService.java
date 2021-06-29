@@ -15,7 +15,6 @@ public class QuoteService {
     public Optional<Quote> getQuote(String sourceCurrency,
                                     String targetCurrency,
                                     int sourceAmount,
-                                    int targetAmount,
                                     int profileId,
                                     String token) {
 
@@ -23,7 +22,6 @@ public class QuoteService {
                 .sourceCurrency(sourceCurrency)
                 .targetCurrency(targetCurrency)
                 .sourceAmount(sourceAmount)
-                .targetAmount(targetAmount)
                 .profileId(profileId)
                 .payout("BANK_TRANSFER")
                 .preferredPayIn("BANK_TRANSFER")

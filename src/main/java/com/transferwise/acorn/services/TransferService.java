@@ -21,13 +21,13 @@ public class TransferService {
         final var quote = quoteService.getQuote(payload.getSourceCurrency(),
                 payload.getTargetCurrency(),
                 payload.getSourceAmount(),
-                payload.getTargetAmount(),
                 payload.getSourceAccount(),
                 payload.getToken());
         if (quote.isEmpty()) {
             return Optional.empty();
         }
         final var quoteUUID = quote.get().getId();
+        System.out.println(quoteUUID);
 
         final var transferDetails = TransferDetails.builder()
                 .reference("mission days")
@@ -38,7 +38,7 @@ public class TransferService {
         final var customerTransactionId = UUID.randomUUID();
         final var wiseTransfer = TransferPayload.builder()
                 .customerTransactionId(customerTransactionId)
-                .quoteUuid("18b158a3-fe7f-4d0d-9fda-1e8b037a80ec")
+                .quoteUuid(quoteUUID)
                 .details(transferDetails)
                 .sourceAccount(payload.getSourceAccount())
                 .targetAccount(payload.getTargetAccount())
