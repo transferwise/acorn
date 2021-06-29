@@ -23,8 +23,6 @@ public class QuoteService {
                 .targetCurrency(targetCurrency)
                 .sourceAmount(sourceAmount)
                 .profileId(profileId)
-                .payout("BANK_TRANSFER")
-                .preferredPayIn("BANK_TRANSFER")
                 .build();
         return quoteClient.getQuote(quote, token);
     }

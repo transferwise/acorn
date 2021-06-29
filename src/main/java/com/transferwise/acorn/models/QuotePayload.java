@@ -7,10 +7,8 @@ import lombok.Builder;
 @Builder
 @JsonSerialize
 public class QuotePayload {
+    final int profileId;
     final String sourceCurrency;
     final String targetCurrency;
-    final int sourceAmount;
-    final int profileId;
-    final String payout;
-    final String preferredPayIn;
+    final double sourceAmount;
 }

@@ -4,7 +4,7 @@ package com.transferwise.acorn.models;
 
 public class Transfer{
     int id;
-     int user;
+    int user;
     public int targetAccount;
     public Object sourceAccount;
     public Object quote;

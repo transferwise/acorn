@@ -27,7 +27,6 @@ public class TransferService {
             return Optional.empty();
         }
         final var quoteUUID = quote.get().getId();
-        System.out.println(quoteUUID);
 
         final var transferDetails = TransferDetails.builder()
                 .reference("mission days")
@@ -36,6 +35,7 @@ public class TransferService {
                 .build();
 
         final var customerTransactionId = UUID.randomUUID();
+
         final var wiseTransfer = TransferPayload.builder()
                 .customerTransactionId(customerTransactionId)
                 .quoteUuid(quoteUUID)
