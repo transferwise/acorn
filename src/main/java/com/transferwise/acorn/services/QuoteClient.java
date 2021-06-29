@@ -32,11 +32,9 @@ public class QuoteClient {
         ResponseEntity<Quote> responseEntity = restTemplate.
                 postForEntity(QUOTE_URL, entity, Quote.class);
 
-
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             return Optional.of(responseEntity.getBody());
         }
-
 
         return Optional.empty();
     }

@@ -3,11 +3,10 @@ package com.transferwise.acorn.models;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Builder;
 
-import java.io.Serializable;
 
 @Builder
 @JsonSerialize
-public class QuotePayload implements Serializable {
+public class QuotePayload {
     final String sourceCurrency;
     final String targetCurrency;
     final int sourceAmount;

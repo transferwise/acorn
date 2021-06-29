@@ -15,7 +15,7 @@ import java.util.Optional;
 @Component
 public class TransferClient {
     private static final String BASE_URL = "https://api.sandbox.transferwise.tech";
-    private static final String TRANSFER_URL = BASE_URL + "/v1/transfer";
+    private static final String TRANSFER_URL = BASE_URL + "/v1/transfers";
 
     public Optional<Transfer> makeTransfer(TransferPayload transfer, String token) {
         RestTemplate restTemplate = new RestTemplate();
@@ -28,6 +28,7 @@ public class TransferClient {
 
         ResponseEntity<Transfer> responseEntity = restTemplate.
                 postForEntity(TRANSFER_URL, entity, Transfer.class);
+
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             return Optional.of(responseEntity.getBody());
         }
