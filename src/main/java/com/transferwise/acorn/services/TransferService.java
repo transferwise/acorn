@@ -18,15 +18,15 @@ public class TransferService {
 
 
     public Optional<Transfer> makeTransferToJar(AcornPayload payload) {
-        final var quoteUUID = quoteService.getQuoteId(payload.getSourceCurrency(),
+        final var quote = quoteService.getQuote(payload.getSourceCurrency(),
                 payload.getTargetCurrency(),
                 payload.getSourceAmount(),
-                payload.getTargetAmount(),
                 payload.getSourceAccount(),
                 payload.getToken());
-        if (quoteUUID.isEmpty()){
+        if (quote.isEmpty()) {
             return Optional.empty();
         }
+        final var quoteUUID = quote.get().getId();
 
         final var transferDetails = TransferDetails.builder()
                 .reference("mission days")
@@ -35,13 +35,15 @@ public class TransferService {
                 .build();
 
         final var customerTransactionId = UUID.randomUUID();
-        TransferPayload wiseTransfer = TransferPayload.builder()
+
+        final var wiseTransfer = TransferPayload.builder()
                 .customerTransactionId(customerTransactionId)
-                .quoteUuid(quoteUUID.toString())
+                .quoteUuid(quoteUUID)
                 .details(transferDetails)
                 .sourceAccount(payload.getSourceAccount())
                 .targetAccount(payload.getTargetAccount())
                 .build();
+
         return wiseClient.makeTransfer(wiseTransfer, payload.getToken());
     }
 }
