@@ -1,8 +1,9 @@
 package com.transferwise.acorn.api;
 
-import com.transferwise.acorn.models.AcornPayload;
-import com.transferwise.acorn.models.Transfer;
-import com.transferwise.acorn.services.TransferService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.transferwise.acorn.models.BalanceResponse;
+import com.transferwise.acorn.services.BalanceService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,10 +18,16 @@ import java.util.Optional;
 @RequestMapping("v1/acorn")
 public class TransferController {
 
-    private final TransferService transferService;
+    private final BalanceService transferService;
 
     @PostMapping("/transfer")
-    public ResponseEntity<Optional<Transfer>> transfer(@RequestBody AcornPayload payload) {
-        return ResponseEntity.ok(transferService.makeTransferToJar(payload));
+    public ResponseEntity<Optional<BalanceResponse>> transfer(@RequestBody Payload payload) throws JsonProcessingException {
+        return ResponseEntity.ok(transferService.makeBalanceToBalanceTransfer(payload.getValue(), payload.getCurrency()));
+    }
+
+    @Getter
+    private static class Payload {
+        double value;
+        String currency;
     }
 }
