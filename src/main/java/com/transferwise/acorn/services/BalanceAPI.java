@@ -1,12 +1,11 @@
 package com.transferwise.acorn.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.transferwise.acorn.models.BalanceResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.ToString;
+import lombok.Data;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -44,10 +43,6 @@ public class BalanceAPI {
                 .targetBalanceId(targetBalanceId)
                 .build();
 
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString( payload );
-        System.out.println(json);
-
         var entity = new HttpEntity<>(payload, headers);
 
         ResponseEntity<BalanceResponse> responseEntity = restTemplate.
@@ -60,7 +55,7 @@ public class BalanceAPI {
     }
 
     @JsonSerialize
-    @ToString
+    @Data
     @Builder
     private static class BalanceTransferPayload {
         private final MoneyValue amount;
@@ -69,7 +64,7 @@ public class BalanceAPI {
     }
 
     @JsonSerialize
-    @ToString
+    @Data
     @AllArgsConstructor
     private static class MoneyValue {
         private final double value;

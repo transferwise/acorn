@@ -3,6 +3,7 @@ package com.transferwise.acorn.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.transferwise.acorn.models.BalanceResponse;
 import com.transferwise.acorn.services.BalanceService;
+import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
