@@ -1,10 +1,8 @@
 package com.transferwise.acorn.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.transferwise.acorn.models.BalanceResponse;
+import com.transferwise.acorn.models.BalanceTransferPayload;
 import com.transferwise.acorn.services.BalanceService;
-import lombok.Data;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,13 +20,22 @@ public class TransferController {
     private final BalanceService transferService;
 
     @PostMapping("/transfer")
-    public ResponseEntity<Optional<BalanceResponse>> transfer(@RequestBody Payload payload) throws JsonProcessingException {
-        return ResponseEntity.ok(transferService.makeBalanceToBalanceTransfer(payload.getValue(), payload.getCurrency()));
-    }
-
-    @Getter
-    private static class Payload {
-        double value;
-        String currency;
+    public ResponseEntity<List<BalanceResponse>> transfer(@RequestBody BalanceTransferPayload payload) {
+        return ResponseEntity.ok(transferService.handleIncomingDepositEvent(payload));
     }
 }
+/*
+{
+    "apiToken": "979999c9-10cf-4da2-9f58-77a7edb57d03",
+    "profileId": 25,
+    "sourceBalanceId": 3324,
+    "currency": "EUR",
+    "incomingDepositAmount": 100,
+    "payments": [
+        1.1
+    ],
+    "targetBalanceIds": [
+        75555
+    ]
+}
+ */

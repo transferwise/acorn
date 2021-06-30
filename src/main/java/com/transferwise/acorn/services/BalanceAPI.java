@@ -1,6 +1,5 @@
 package com.transferwise.acorn.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.transferwise.acorn.models.BalanceResponse;
 import lombok.AllArgsConstructor;
@@ -27,7 +26,7 @@ public class BalanceAPI {
                                                                   String currency,
                                                                   int profileId,
                                                                   int sourceBalanceId,
-                                                                  int targetBalanceId) throws JsonProcessingException {
+                                                                  int targetBalanceId) {
         final String BALANCE_TRANSFER_URL = BASE_URL + "/gateway/v2/profiles/" + profileId + "/balance-movements";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -38,7 +37,7 @@ public class BalanceAPI {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         var payload = BalanceTransferPayload.builder()
-                .amount(new MoneyValue(value,currency))
+                .amount(new MoneyValue(value, currency))
                 .sourceBalanceId(sourceBalanceId)
                 .targetBalanceId(targetBalanceId)
                 .build();
