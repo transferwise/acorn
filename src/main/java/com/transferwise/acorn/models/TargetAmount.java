@@ -1,6 +1,6 @@
 package com.transferwise.acorn.models;
 
-public class Fee{
+public class TargetAmount {
     public double value;
     public String currency;
 }
