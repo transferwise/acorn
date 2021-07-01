@@ -10,7 +10,7 @@ import java.util.Date;
 @Data
 public class BalanceValue {
 
-	int id;
+	Long id;
 	String currency;
 	Amount amount;
 	ReservedAmount reservedAmount;

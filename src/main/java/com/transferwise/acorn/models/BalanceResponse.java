@@ -9,7 +9,7 @@ import java.util.List;
 
 @JsonSerialize
 public class BalanceResponse {
-    public int id;
+    public Long id;
     public String type;
     public String state;
     public String channelName;

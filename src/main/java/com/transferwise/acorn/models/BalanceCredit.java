@@ -8,13 +8,10 @@ import java.time.Instant;
 
 @Data
 public class BalanceCredit {
-    @JsonProperty("resource")
     private Resource resource;
     @JsonProperty("transaction_type")
     private String transactionType;
-    @JsonProperty("amount")
     private BigDecimal amount;
-    @JsonProperty("currency")
     private String currency;
     @JsonProperty("post_transaction_balance_amount")
     private BigDecimal postTransactionBalanceAmount;
