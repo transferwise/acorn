@@ -6,5 +6,5 @@ import java.util.List;
 
 @AllArgsConstructor
 public class BalancesResponse {
-	List<BalanceValue> balances;
+	List<OpenBalanceCommand> balances;
 }
