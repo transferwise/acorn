@@ -27,7 +27,7 @@ public class BalanceValue {
 	@Data
 	@NoArgsConstructor
 	private static class Amount {
-		private int value;
+		private Long value;
 		private String currency;
 	}
 
@@ -35,7 +35,7 @@ public class BalanceValue {
 	@Data
 	@NoArgsConstructor
 	private static class ReservedAmount {
-		private int value;
+		private Long value;
 		private String currency;
 	}
 
@@ -43,7 +43,7 @@ public class BalanceValue {
 	@Data
 	@NoArgsConstructor
 	private static class TotalWorth {
-		private int value;
+		private Long value;
 		private String currency;
 	}
 
