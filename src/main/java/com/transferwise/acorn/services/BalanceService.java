@@ -1,15 +1,14 @@
 package com.transferwise.acorn.services;
 
 import com.transferwise.acorn.balance.InvalidBalanceException;
-import com.transferwise.acorn.models.BalanceCredit;
 import com.transferwise.acorn.models.BalanceTransferPayload;
 import com.transferwise.acorn.models.Icon;
 import com.transferwise.acorn.models.MoneyValue;
 import com.transferwise.acorn.models.OpenBalanceCommand;
 import com.transferwise.acorn.models.RuleDecision;
-import com.transferwise.acorn.models.*;
 import com.transferwise.acorn.webhook.BalanceDeposit;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +18,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BalanceService {
 
@@ -34,6 +34,7 @@ public class BalanceService {
     public void handleIncomingDepositWebhooksEvent(BalanceDeposit balanceDeposit) {
         RuleDecision ruleDecision = ruleSetEngine.applyRules(balanceDeposit.getCurrency(), balanceDeposit.getAmount());
         if (Boolean.FALSE.equals(ruleDecision.getPassed())) {
+            log.info("Deposit amount less than set in rules. No Balance Transfer Required");
             return;
         }
         Long profileId = balanceDeposit.getResource().getProfileId();
@@ -41,15 +42,12 @@ public class BalanceService {
 
 
         if (activeBalances.isEmpty()) {
-            return;
+            throw new InvalidBalanceException("No available balances found");
         }
 
         String currency = balanceDeposit.getCurrency();
         Long sourceJarId = getSourceJarId(activeBalances, currency);
         Long targetJarId = getTargetJarId(profileId, balanceDeposit.getCurrency(), activeBalances);
-        if (targetJarId == null) {
-            return;
-        }
 
         BalanceTransferPayload balanceTransferPayload = BalanceTransferPayload.builder()
                 .amount(new MoneyValue(ruleDecision.getAmountToForwardToJar(), currency))
@@ -89,9 +87,9 @@ public class BalanceService {
     }
 
     private List<Predicate<BalanceValue>> getFilterPredicates(String type, String currency) {
-        Predicate<BalanceValue> visibilityPredicate =  balance -> balance.isVisible();
-        Predicate<BalanceValue> currencyPredicate =  balance -> type.equals(balance.getType());
-        Predicate<BalanceValue> typePredicate =   balance -> type.equals(balance.getType());
+        Predicate<BalanceValue> visibilityPredicate = balance -> balance.isVisible();
+        Predicate<BalanceValue> currencyPredicate = balance -> type.equals(balance.getType());
+        Predicate<BalanceValue> typePredicate = balance -> currency.equals(balance.getCurrency());
         return Arrays.asList(visibilityPredicate, currencyPredicate, typePredicate);
     }
 }
