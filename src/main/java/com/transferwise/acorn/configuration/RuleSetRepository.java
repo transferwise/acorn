@@ -13,7 +13,7 @@ public class RuleSetRepository {
 	@Value("${wise.ruleset}")
 	private Map<String, Rule> rules;
 
-	@Value("${wise.ruleset.rules}")
+	@Value("${wise.ruleset.default}")
 	private Rule defaultRules;
 
 	public Optional<Rule> getRuleForCurrency(String currency) {
