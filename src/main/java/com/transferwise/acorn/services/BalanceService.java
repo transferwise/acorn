@@ -12,6 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BalanceService {
 
+    private static final String JAR_TYPE = "SAVINGS";
     private final BalanceAPI balanceAPI;
     private final SavingsService savingsService;
     @Value("${api.token}")
@@ -29,7 +30,8 @@ public class BalanceService {
 
         final String currency = balanceCredit.getCurrency();
         final Long sourceJarId = balanceCredit.getResource().getId();
-        final Long targetJarId = getTargetJarId(activeBalances.get());
+        final Long targetJarId = getTargetJarId(balanceCredit.getCurrency(), activeBalances.get());
+
 
         balanceAPI.makeBalanceToBalanceTransfer(
                 token,
@@ -41,25 +43,19 @@ public class BalanceService {
         );
     }
 
-
-    private Long getTargetJarId(List<BalanceValue> balances) {
-        // TODO
-        int targerJarId = -1;
-
+    private Long getTargetJarId(String currency, List<OpenBalanceCommand> balances) {
+        final var currentTargetJarId = balances.stream()
+                .filter(openBalanceCommand -> openBalanceCommand.visible)
+                .filter(openBalanceCommand -> openBalanceCommand.currency.equals(currency))
+                .filter(openBalanceCommand -> JAR_TYPE.equals(openBalanceCommand.type))
+                .filter(openBalanceCommand -> openBalanceCommand.name.startsWith("SAVINGS "))
+                .map(openBalanceCommand -> openBalanceCommand.id)
+                .findFirst();
+        if (currentTargetJarId.isPresent()) {
+            return Long.valueOf(currentTargetJarId.get());
+        }
+        // TODO make new jar, return its ID
 
         return 75555L;
     }
-
-    /*
-    private Optional<BalanceResponse> makeBalanceToBalanceTransfer(BalanceTransferPayload payload, double payment, int targetBalanceId) {
-        return balanceAPI.makeBalanceToBalanceTransfer(
-                payload.getApiToken(),
-                payment,
-                payload.getCurrency(),
-                payload.getProfileId(),
-                payload.getSourceBalanceId(),
-                targetBalanceId
-        );
-    }
-     */
 }
