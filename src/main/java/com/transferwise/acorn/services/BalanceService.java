@@ -3,6 +3,7 @@ package com.transferwise.acorn.services;
 import com.transferwise.acorn.balance.InvalidBalanceException;
 import com.transferwise.acorn.models.BalanceTransferPayload;
 import com.transferwise.acorn.models.BalanceType;
+import com.transferwise.acorn.models.BalanceValue;
 import com.transferwise.acorn.models.Icon;
 import com.transferwise.acorn.models.MoneyValue;
 import com.transferwise.acorn.models.OpenBalanceCommand;

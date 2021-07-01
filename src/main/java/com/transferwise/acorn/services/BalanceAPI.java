@@ -2,6 +2,7 @@ package com.transferwise.acorn.services;
 
 import com.transferwise.acorn.models.BalanceResponse;
 import com.transferwise.acorn.models.BalanceTransferPayload;
+import com.transferwise.acorn.models.BalanceValue;
 import com.transferwise.acorn.models.OpenBalanceCommand;
 
 import java.util.List;

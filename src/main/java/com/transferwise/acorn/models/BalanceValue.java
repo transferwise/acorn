@@ -1,6 +1,7 @@
-package com.transferwise.acorn.services;
+package com.transferwise.acorn.models;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.transferwise.acorn.models.MoneyValue;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,9 +13,9 @@ public class BalanceValue {
 
 	private Long id;
 	private String currency;
-	private Amount amount;
-	private ReservedAmount reservedAmount;
-	private TotalWorth totalWorth;
+	private MoneyValue amount;
+	private MoneyValue reservedAmount;
+	private MoneyValue totalWorth;
 	private String type;
 	private String name;
 	private Icon icon;
@@ -22,30 +23,6 @@ public class BalanceValue {
 	private Date creationTime;
 	private Date modificationTime;
 	private boolean visible;
-
-	@JsonSerialize
-	@Data
-	@NoArgsConstructor
-	private static class Amount {
-		private Long value;
-		private String currency;
-	}
-
-	@JsonSerialize
-	@Data
-	@NoArgsConstructor
-	private static class ReservedAmount {
-		private Long value;
-		private String currency;
-	}
-
-	@JsonSerialize
-	@Data
-	@NoArgsConstructor
-	private static class TotalWorth {
-		private Long value;
-		private String currency;
-	}
 
 	@JsonSerialize
 	@Data
