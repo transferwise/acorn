@@ -3,7 +3,7 @@ server:
 
 wise:
   api-url: https://api.sandbox.transferwise.tech
-  oauth-token: whatever
+  oauth-token: 979999c9-10cf-4da2-9f58-77a7edb57d03
   ruleset:
     default:
       min-deposit-amount: 10
@@ -12,7 +12,7 @@ wise:
     EUR:
       min-deposit-amount: 20
       max-deposit-amount: 200
-        percentage: 50
+      percentage: 50
     GBP:
       min-deposit-amount: 25
       max-deposit-amount: 200

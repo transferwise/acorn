@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Component
 public class RuleSetRepository {
+	/*
 
 	@Value("${wise.ruleset}")
 	private Map<String, Rule> rules;
@@ -23,4 +24,6 @@ public class RuleSetRepository {
 	public Rule getDefaultRuleForCurrency() {
 		return defaultRules;
 	}
+
+	 */
 }
