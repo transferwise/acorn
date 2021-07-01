@@ -3,6 +3,7 @@ package com.transferwise.acorn.services;
 import com.transferwise.acorn.models.BalanceCredit;
 import com.transferwise.acorn.models.Icon;
 import com.transferwise.acorn.models.OpenBalanceCommand;
+import com.transferwise.acorn.models.RuleDecision;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -17,14 +18,14 @@ public class BalanceService {
 
     private static final String JAR_TYPE = "SAVINGS";
     private final RestTemplateBalanceAPI balanceAPI;
-    private final SavingsService savingsService;
+    private final RuleSetEngine ruleSetEngine;
     @Value("${wise.oauth-token}")
     private String token;
 
     @Async
     public void handleIncomingDepositWebhooksEvent(BalanceCredit balanceCredit) {
-        final double toBeSavedAmount = savingsService.savingsAmount(balanceCredit);
-        if (toBeSavedAmount == 0) {
+        RuleDecision ruleDecision = ruleSetEngine.applyRules(balanceCredit.getCurrency(), balanceCredit.getAmount());
+        if (Boolean.FALSE.equals(ruleDecision.getPassed())) {
             return;
         }
         final Long profileId = balanceCredit.getResource().getProfileId();
@@ -39,7 +40,7 @@ public class BalanceService {
         final Optional<Long> targetJarId = getTargetJarId(profileId, balanceCredit.getCurrency(), activeBalances.get());
         targetJarId.ifPresent
                 (aLong -> balanceAPI.makeBalanceToBalanceTransfer
-                        (token, toBeSavedAmount, currency, profileId, sourceJarId, aLong));
+                        (token, ruleDecision.getAmountToForwardToJar().doubleValue(), currency, profileId, sourceJarId, aLong));
     }
 
     private Optional<Long> getTargetJarId(Long profileId, String currency, List<BalanceValue> balances) {
