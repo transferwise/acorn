@@ -10,7 +10,6 @@ import java.util.Date;
 @JsonSerialize
 @Data
 public class BalanceValue {
-
 	private Long id;
 	private String currency;
 	private MoneyValue amount;
@@ -23,14 +22,4 @@ public class BalanceValue {
 	private Date creationTime;
 	private Date modificationTime;
 	private boolean visible;
-
-	@JsonSerialize
-	@Data
-	@NoArgsConstructor
-	private static class Icon {
-		private String type;
-		private String value;
-	}
-
-
 }
