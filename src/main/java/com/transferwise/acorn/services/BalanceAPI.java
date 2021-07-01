@@ -14,8 +14,8 @@ public interface BalanceAPI {
                                                                   Long sourceBalanceId,
                                                                   Long targetBalanceId);
 
-    Optional<List<OpenBalanceCommand>> findActiveBalances(String token,
+    Optional<List<BalanceValue>> findActiveBalances(String token,
                                                            Long profileId);
 
-    Optional<OpenBalanceCommand> createBalanceJar(com.transferwise.acorn.models.OpenBalanceCommand openBalanceCommand);
+    Optional<BalanceValue> createBalanceJar(com.transferwise.acorn.models.OpenBalanceCommand openBalanceCommand);
 }

@@ -43,7 +43,7 @@ public class BalanceService {
         );
     }
 
-    private Long getTargetJarId(String currency, List<OpenBalanceCommand> balances) {
+    private Long getTargetJarId(String currency, List<BalanceValue> balances) {
         final var currentTargetJarId = balances.stream()
                 .filter(openBalanceCommand -> openBalanceCommand.visible)
                 .filter(openBalanceCommand -> openBalanceCommand.currency.equals(currency))
