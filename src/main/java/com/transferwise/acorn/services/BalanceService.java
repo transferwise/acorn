@@ -1,26 +1,40 @@
 package com.transferwise.acorn.services;
 
-import com.transferwise.acorn.models.*;
+import com.transferwise.acorn.balance.InvalidBalanceException;
+import com.transferwise.acorn.models.BalanceTransferPayload;
+import com.transferwise.acorn.models.Icon;
+import com.transferwise.acorn.models.MoneyValue;
+import com.transferwise.acorn.models.OpenBalanceCommand;
+import com.transferwise.acorn.models.RuleDecision;
 import com.transferwise.acorn.webhook.BalanceDeposit;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BalanceService {
 
     private static final String JAR_TYPE = "SAVINGS";
+    public static final String EMOJI_PINEAPPLE = "\uD83C\uDF4D";
     private final BalanceAPI balanceAPI;
+    public static final String EMOJI = "EMOJI";
+    public static final String SAVINGS_JAR_NAME_PREFIX = "SAVINGS ";
+    public static final String STANDARD_JAR_TYPE = "STANDARD";
     private final RuleSetEngine ruleSetEngine;
 
     @Async
     public void handleIncomingDepositWebhooksEvent(BalanceDeposit balanceDeposit) {
         RuleDecision ruleDecision = ruleSetEngine.applyRules(balanceDeposit.getCurrency(), balanceDeposit.getAmount());
         if (!ruleDecision.isPassed()) {
+            log.info("Deposit amount less than set in rules. No Balance Transfer Required");
             return;
         }
         Long profileId = balanceDeposit.getResource().getProfileId();
@@ -28,15 +42,12 @@ public class BalanceService {
 
 
         if (activeBalances.isEmpty()) {
-            return;
+            throw new InvalidBalanceException("No available balances found");
         }
 
         String currency = balanceDeposit.getCurrency();
         Long sourceJarId = getSourceJarId(activeBalances, currency);
         Long targetJarId = getTargetJarId(profileId, balanceDeposit.getCurrency(), activeBalances);
-        if (targetJarId == null) {
-            return;
-        }
 
         BalanceTransferPayload balanceTransferPayload = BalanceTransferPayload.builder()
                 .amount(new MoneyValue(ruleDecision.getAmountToForwardToJar(), currency))
@@ -47,19 +58,19 @@ public class BalanceService {
         balanceAPI.makeBalanceToBalanceTransfer(profileId, balanceTransferPayload);
     }
 
-    private Long getSourceJarId(List<BalanceValue> activeBalances, String currency) {
-        return activeBalances.stream().filter(it -> "STANDARD".equals(it.getType()))
-                .filter(it -> currency.equals(it.getCurrency()))
-                .filter(it -> it.visible).findFirst().map(it -> (Long.valueOf(it.id))).get();
+    private Long getSourceJarId(List<BalanceValue> balances, String currency) {
+        var predicates = getFilterPredicates(STANDARD_JAR_TYPE, currency);
+        return balances.stream()
+                .filter(predicates.stream().reduce(x->true, Predicate::and))
+                .findFirst().map(balance -> (Long.valueOf(balance.getId()))).orElseThrow(() -> new InvalidBalanceException("No Regular Visible Balance Available for currency " + currency));
     }
 
     private Long getTargetJarId(Long profileId, String currency, List<BalanceValue> balances) {
+        var predicates = getFilterPredicates(JAR_TYPE, currency);
         Optional<Long> currentTargetJarId = balances.stream()
-                .filter(openBalanceCommand -> openBalanceCommand.visible)
-                .filter(openBalanceCommand -> openBalanceCommand.currency.equals(currency))
-                .filter(openBalanceCommand -> JAR_TYPE.equals(openBalanceCommand.type))
-                .filter(openBalanceCommand -> openBalanceCommand.name.startsWith("SAVINGS "))
-                .map(openBalanceCommand -> openBalanceCommand.id)
+                .filter(predicates.stream().reduce(x->true, Predicate::and))
+                .filter(balance -> balance.getName().startsWith(SAVINGS_JAR_NAME_PREFIX))
+                .map(balance -> balance.getId())
                 .findFirst();
         if (currentTargetJarId.isPresent()) {
             return currentTargetJarId.get();
@@ -69,10 +80,16 @@ public class BalanceService {
                 .currency(currency)
                 .type(JAR_TYPE)
                 .name(newName)
-                .icon(new Icon("EMOJI", "\uD83C\uDF4D"))
+                .icon(new Icon(EMOJI, EMOJI_PINEAPPLE))
                 .build();
 
-        BalanceValue newBalance = balanceAPI.createBalanceJar(profileId, command);
-        return newBalance.getId();
+        return balanceAPI.createBalanceJar(profileId, command).getId();
+    }
+
+    private List<Predicate<BalanceValue>> getFilterPredicates(String type, String currency) {
+        Predicate<BalanceValue> visibilityPredicate = balance -> balance.isVisible();
+        Predicate<BalanceValue> currencyPredicate = balance -> type.equals(balance.getType());
+        Predicate<BalanceValue> typePredicate = balance -> currency.equals(balance.getCurrency());
+        return Arrays.asList(visibilityPredicate, currencyPredicate, typePredicate);
     }
 }
