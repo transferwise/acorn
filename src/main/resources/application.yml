@@ -1,10 +1,10 @@
 server:
   port: 50550
 api:
-  token: whatever
+  token: janes
 wise:
-  api-url: https://api.sandbox.transferwise.tech
-  oauth-token: 979999c9-10cf-4da2-9f58-77a7edb57d03
+  api-url: https://wise.com
+  oauth-token: whatever
   ruleset:
     default:
       min-deposit-amount: 10

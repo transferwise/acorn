@@ -23,91 +23,92 @@ import java.util.UUID;
 @Component
 public class RestTemplateBalanceAPI implements BalanceAPI {
 
-	private static final String BASE_URL = "https://sandbox.transferwise.tech";
-	private static final String CREATE_JAR = BASE_URL + "/gateway/v4/profiles/{profileId}/balances";
+    private static final String BASE_URL = "https://wise.com";
+    private static final String CREATE_JAR = BASE_URL + "/gateway/v4/profiles/{profileId}/balances";
 
-	@Override
-	public Optional<BalanceResponse> makeBalanceToBalanceTransfer(String token,
-	                                                              double value,
-	                                                              String currency,
-	                                                              Long profileId,
-	                                                              Long sourceBalanceId,
-	                                                              Long targetBalanceId) {
-		final String BALANCE_TRANSFER_URL = BASE_URL + "/gateway/v2/profiles/" + profileId + "/balance-movements";
+    @Override
+    public Optional<BalanceResponse> makeBalanceToBalanceTransfer(String token,
+                                                                  double value,
+                                                                  String currency,
+                                                                  Long profileId,
+                                                                  Long sourceBalanceId,
+                                                                  Long targetBalanceId) {
+        final String BALANCE_TRANSFER_URL = BASE_URL + "/gateway/v2/profiles/" + profileId + "/balance-movements";
 
-		RestTemplate restTemplate = new RestTemplate();
+        RestTemplate restTemplate = new RestTemplate();
 
-		HttpHeaders headers = getHttpHeaders(token);
+        HttpHeaders headers = getHttpHeaders(token);
 
-		var payload = BalanceTransferPayload.builder()
-				.amount(new MoneyValue(value, currency))
-				.sourceBalanceId(sourceBalanceId)
-				.targetBalanceId(targetBalanceId)
-				.build();
+        var payload = BalanceTransferPayload.builder()
+                .amount(new MoneyValue(value, currency))
+                .sourceBalanceId(sourceBalanceId)
+                .targetBalanceId(targetBalanceId)
+                .build();
 
-		var entity = new HttpEntity<>(payload, headers);
-		ResponseEntity<BalanceResponse> responseEntity = restTemplate.
-				postForEntity(BALANCE_TRANSFER_URL, entity, BalanceResponse.class);
+        var entity = new HttpEntity<>(payload, headers);
+        ResponseEntity<BalanceResponse> responseEntity = restTemplate.
+                postForEntity(BALANCE_TRANSFER_URL, entity, BalanceResponse.class);
 
-		if (responseEntity.getStatusCode() == HttpStatus.CREATED) {
-			return Optional.of(responseEntity.getBody());
-		}
-		return Optional.empty();
-	}
+        if (responseEntity.getStatusCode() == HttpStatus.CREATED) {
+            return Optional.of(responseEntity.getBody());
+        }
+        return Optional.empty();
+    }
 
-	@Override
-	public Optional<List<BalanceValue>> findActiveBalances(String token,
-	                                                                                             Long profileId) {
+    @Override
+    public Optional<List<BalanceValue>> findActiveBalances(String token,
+                                                           Long profileId) {
 
-		final String BALANCES_URL = BASE_URL + "/gateway/v4/profiles/" + profileId + "/balances?types=SAVINGS,STANDARD";
+        final String BALANCES_URL = BASE_URL + "/gateway/v4/profiles/" + profileId + "/balances?types=SAVINGS,STANDARD";
 
-		RestTemplate restTemplate = new RestTemplate();
-		HttpHeaders headers = getHttpHeaders(token);
-		var entity = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = getHttpHeaders(token);
+        var entity = new HttpEntity<>(headers);
 
-		ResponseEntity<List<BalanceValue>> responseEntity = restTemplate.exchange(BALANCES_URL, HttpMethod.GET, entity, new ParameterizedTypeReference<List<BalanceValue>>() {});
+        ResponseEntity<List<BalanceValue>> responseEntity = restTemplate.exchange(BALANCES_URL, HttpMethod.GET, entity, new ParameterizedTypeReference<List<BalanceValue>>() {
+        });
 
-		if (responseEntity.getStatusCode() == HttpStatus.OK) {
-			List<BalanceValue> body = responseEntity.getBody();
-			return Optional.of(body);
-		}
-		return Optional.empty();
-	}
+        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+            List<BalanceValue> body = responseEntity.getBody();
+            return Optional.of(body);
+        }
+        return Optional.empty();
+    }
 
-	@Override
-	public Optional<BalanceValue> createBalanceJar(Long profileId, String token, OpenBalanceCommand openBalanceCommand) {
-		RestTemplate restTemplate = new RestTemplate();
-		var entity = new HttpEntity<>(openBalanceCommand, getHttpHeaders(token));
-		ResponseEntity<BalanceValue> responseEntity = restTemplate.exchange(
-				CREATE_JAR, HttpMethod.POST, entity, BalanceValue.class,profileId);
-		if (responseEntity.getStatusCode() == HttpStatus.CREATED) {
-			return Optional.of(responseEntity.getBody());
-		}
-		return Optional.empty();
-	}
+    @Override
+    public Optional<BalanceValue> createBalanceJar(Long profileId, String token, OpenBalanceCommand openBalanceCommand) {
+        RestTemplate restTemplate = new RestTemplate();
+        var entity = new HttpEntity<>(openBalanceCommand, getHttpHeaders(token));
+        ResponseEntity<BalanceValue> responseEntity = restTemplate.exchange(
+                CREATE_JAR, HttpMethod.POST, entity, BalanceValue.class, profileId);
+        if (responseEntity.getStatusCode() == HttpStatus.CREATED) {
+            return Optional.of(responseEntity.getBody());
+        }
+        return Optional.empty();
+    }
 
-	private HttpHeaders getHttpHeaders(String token) {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setBearerAuth(token);
-		headers.set("X-idempotence-uuid", String.valueOf(UUID.randomUUID()));
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		return headers;
-	}
+    private HttpHeaders getHttpHeaders(String token) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.set("X-idempotence-uuid", String.valueOf(UUID.randomUUID()));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
+    }
 
-	@JsonSerialize
-	@Data
-	@Builder
-	private static class BalanceTransferPayload {
-		private final MoneyValue amount;
-		private final Long sourceBalanceId;
-		private final Long targetBalanceId;
-	}
+    @JsonSerialize
+    @Data
+    @Builder
+    private static class BalanceTransferPayload {
+        private final MoneyValue amount;
+        private final Long sourceBalanceId;
+        private final Long targetBalanceId;
+    }
 
-	@JsonSerialize
-	@Data
-	@AllArgsConstructor
-	private static class MoneyValue {
-		private final double value;
-		private final String currency;
-	}
+    @JsonSerialize
+    @Data
+    @AllArgsConstructor
+    private static class MoneyValue {
+        private final double value;
+        private final String currency;
+    }
 }
