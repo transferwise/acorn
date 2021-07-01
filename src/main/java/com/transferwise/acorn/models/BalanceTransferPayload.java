@@ -1,16 +1,14 @@
 package com.transferwise.acorn.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
-import java.util.List;
-
 @Getter
+@AllArgsConstructor
+@Builder
 public class BalanceTransferPayload {
-    String apiToken;
-    int profileId;
-    int sourceBalanceId;
-    String currency;
-    double incomingDepositAmount;
-    List<Double> payments;
-    List<Integer> targetBalanceIds;
+    private final MoneyValue amount;
+    private final Long sourceBalanceId;
+    private final Long targetBalanceId;
 }

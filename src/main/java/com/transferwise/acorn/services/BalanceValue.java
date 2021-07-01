@@ -1,7 +1,6 @@
 package com.transferwise.acorn.services;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +10,7 @@ import java.util.Date;
 @Data
 public class BalanceValue {
 
-	int id;
+	Long id;
 	String currency;
 	Amount amount;
 	ReservedAmount reservedAmount;
@@ -28,7 +27,7 @@ public class BalanceValue {
 	@Data
 	@NoArgsConstructor
 	private static class Amount {
-		private int value;
+		private Long value;
 		private String currency;
 	}
 
@@ -36,7 +35,7 @@ public class BalanceValue {
 	@Data
 	@NoArgsConstructor
 	private static class ReservedAmount {
-		private int value;
+		private Long value;
 		private String currency;
 	}
 
@@ -44,7 +43,7 @@ public class BalanceValue {
 	@Data
 	@NoArgsConstructor
 	private static class TotalWorth {
-		private int value;
+		private Long value;
 		private String currency;
 	}
 

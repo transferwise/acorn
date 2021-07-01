@@ -1,7 +1,9 @@
 package com.transferwise.acorn.models;
 
+import java.math.BigDecimal;
+
 public class SourceAmount{
-    public double value;
+    public BigDecimal value;
     public String currency;
 }
 

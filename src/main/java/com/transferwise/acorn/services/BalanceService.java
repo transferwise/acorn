@@ -1,17 +1,18 @@
 package com.transferwise.acorn.services;
 
+import com.transferwise.acorn.models.*;
 import com.transferwise.acorn.balance.InvalidBalanceException;
 import com.transferwise.acorn.models.BalanceCredit;
 import com.transferwise.acorn.models.Icon;
 import com.transferwise.acorn.models.OpenBalanceCommand;
 import com.transferwise.acorn.models.RuleDecision;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -20,13 +21,11 @@ import java.util.stream.Stream;
 public class BalanceService {
 
     private static final String JAR_TYPE = "SAVINGS";
+    private final BalanceAPI balanceAPI;
     public static final String EMOJI = "EMOJI";
     public static final String SAVINGS_JAR_NAME_PREFIX = "SAVINGS ";
     public static final String STANDARD_JAR_TYPE = "STANDARD";
-    private final RestTemplateBalanceAPI balanceAPI;
     private final RuleSetEngine ruleSetEngine;
-    @Value("${wise.oauth-token}")
-    private String token;
 
     @Async
     public void handleIncomingDepositWebhooksEvent(BalanceCredit balanceCredit) {
@@ -44,14 +43,13 @@ public class BalanceService {
             return;
         }
 
-        balanceAPI.makeBalanceToBalanceTransfer(
-                token,
-                ruleDecision.getAmountToForwardToJar().doubleValue(),
-                currency,
-                profileId,
-                sourceJarId,
-                targetJarId
-        );
+        BalanceTransferPayload balanceTransferPayload = BalanceTransferPayload.builder()
+                .amount(new MoneyValue(ruleDecision.getAmountToForwardToJar(), currency))
+                .sourceBalanceId(sourceJarId)
+                .targetBalanceId(targetJarId)
+                .build();
+
+        balanceAPI.makeBalanceToBalanceTransfer(profileId, balanceTransferPayload);
     }
 
     private Long getSourceJarId(List<BalanceValue> balances, String currency) {
@@ -62,7 +60,7 @@ public class BalanceService {
     }
 
     private Long getTargetJarId(Long profileId, String currency, List<BalanceValue> balances) {
-        final var currentTargetJarId = balances.stream()
+        Optional<Long> currentTargetJarId = balances.stream()
                 .filter(openBalanceCommand -> openBalanceCommand.visible)
                 .filter(openBalanceCommand -> openBalanceCommand.currency.equals(currency))
                 .filter(openBalanceCommand -> JAR_TYPE.equals(openBalanceCommand.type))
@@ -70,10 +68,10 @@ public class BalanceService {
                 .map(openBalanceCommand -> openBalanceCommand.id)
                 .findFirst();
         if (currentTargetJarId.isPresent()) {
-            return Long.valueOf(currentTargetJarId.get());
+            return currentTargetJarId.get();
         }
-        final var newName = "SAVINGS " + currency;
-        final var command = OpenBalanceCommand.builder()
+        String newName = "SAVINGS " + currency;
+        OpenBalanceCommand command = OpenBalanceCommand.builder()
                 .currency(currency)
                 .type(JAR_TYPE)
                 .name(newName)
