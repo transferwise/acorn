@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,6 +54,34 @@ public class BalanceAPI {
         return Optional.empty();
     }
 
+    public Optional<BalancesResponse> findActiveBalances(String token,
+                                                           Long profileId) {
+
+        final String BALANCES_URL = BASE_URL + "/gateway/v4/profiles/" + profileId + "/balances";
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.set("X-idempotence-uuid", String.valueOf(UUID.randomUUID()));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        var payload = BalancesPayload.builder()
+                .types(List.of(BalanceType.STANDARD, BalanceType.SAVINGS))
+                .includeHidden(false)
+                .build();
+
+        var entity = new HttpEntity<>(payload, headers);
+
+        ResponseEntity<BalancesResponse> responseEntity = restTemplate.
+                postForEntity(BALANCES_URL, entity, BalancesResponse.class);
+
+        if (responseEntity.getStatusCode() == HttpStatus.CREATED) {
+            return Optional.of(responseEntity.getBody());
+        }
+        return Optional.empty();
+    }
+
     @JsonSerialize
     @Data
     @Builder
@@ -69,4 +98,5 @@ public class BalanceAPI {
         private final double value;
         private final String currency;
     }
+
 }
