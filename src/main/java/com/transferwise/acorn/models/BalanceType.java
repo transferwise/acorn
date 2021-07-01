@@ -1,4 +1,4 @@
-package com.transferwise.acorn.services;
+package com.transferwise.acorn.models;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 

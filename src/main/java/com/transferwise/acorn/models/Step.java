@@ -1,5 +1,6 @@
 package com.transferwise.acorn.models;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -17,5 +18,5 @@ public class Step{
     public int sourceBalanceId;
     public int targetBalanceId;
     public Fee fee;
-    public double rate;
+    public BigDecimal rate;
 }
