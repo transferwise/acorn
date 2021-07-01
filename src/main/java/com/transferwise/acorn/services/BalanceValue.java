@@ -3,12 +3,13 @@ package com.transferwise.acorn.services;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @JsonSerialize
 @Data
-public class OpenBalanceCommand {
+public class BalanceValue {
 
 	int id;
 	String currency;
@@ -25,7 +26,7 @@ public class OpenBalanceCommand {
 
 	@JsonSerialize
 	@Data
-	@Builder
+	@NoArgsConstructor
 	private static class Amount {
 		private int value;
 		private String currency;
@@ -33,7 +34,7 @@ public class OpenBalanceCommand {
 
 	@JsonSerialize
 	@Data
-	@Builder
+	@NoArgsConstructor
 	private static class ReservedAmount {
 		private int value;
 		private String currency;
@@ -41,7 +42,7 @@ public class OpenBalanceCommand {
 
 	@JsonSerialize
 	@Data
-	@Builder
+	@NoArgsConstructor
 	private static class TotalWorth {
 		private int value;
 		private String currency;
@@ -49,7 +50,7 @@ public class OpenBalanceCommand {
 
 	@JsonSerialize
 	@Data
-	@Builder
+	@NoArgsConstructor
 	private static class Icon {
 		private String type;
 		private String value;
