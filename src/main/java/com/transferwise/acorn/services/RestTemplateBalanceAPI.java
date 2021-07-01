@@ -24,6 +24,7 @@ import java.util.UUID;
 public class RestTemplateBalanceAPI implements BalanceAPI {
 
 	private static final String BASE_URL = "https://sandbox.transferwise.tech";
+	private static final String CREATE_JAR = BASE_URL + "/gateway/v4/profiles/${profileId}/balances";
 
 	@Override
 	public Optional<BalanceResponse> makeBalanceToBalanceTransfer(String token,
@@ -36,10 +37,7 @@ public class RestTemplateBalanceAPI implements BalanceAPI {
 
 		RestTemplate restTemplate = new RestTemplate();
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setBearerAuth(token);
-		headers.set("X-idempotence-uuid", String.valueOf(UUID.randomUUID()));
-		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpHeaders headers = getHttpHeaders(token);
 
 		var payload = BalanceTransferPayload.builder()
 				.amount(new MoneyValue(value, currency))
@@ -48,7 +46,6 @@ public class RestTemplateBalanceAPI implements BalanceAPI {
 				.build();
 
 		var entity = new HttpEntity<>(payload, headers);
-
 		ResponseEntity<BalanceResponse> responseEntity = restTemplate.
 				postForEntity(BALANCE_TRANSFER_URL, entity, BalanceResponse.class);
 
@@ -65,13 +62,7 @@ public class RestTemplateBalanceAPI implements BalanceAPI {
 		final String BALANCES_URL = BASE_URL + "/gateway/v4/profiles/" + profileId + "/balances?types=SAVINGS,STANDARD";
 
 		RestTemplate restTemplate = new RestTemplate();
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setBearerAuth(token);
-		headers.set("X-idempotence-uuid", String.valueOf(UUID.randomUUID()));
-		headers.setContentType(MediaType.APPLICATION_JSON);
-
-
+		HttpHeaders headers = getHttpHeaders(token);
 		var entity = new HttpEntity<>(headers);
 
 		ResponseEntity<List<BalanceValue>> responseEntity = restTemplate.exchange(BALANCES_URL, HttpMethod.GET, entity, new ParameterizedTypeReference<List<BalanceValue>>() {});
@@ -84,8 +75,23 @@ public class RestTemplateBalanceAPI implements BalanceAPI {
 	}
 
 	@Override
-	public Optional<BalanceValue> createBalanceJar(OpenBalanceCommand openBalanceCommand) {
+	public Optional<BalanceValue> createBalanceJar(Long profileId, String token, OpenBalanceCommand openBalanceCommand) {
+		RestTemplate restTemplate = new RestTemplate();
+		var entity = new HttpEntity<>(openBalanceCommand, getHttpHeaders(token));
+		ResponseEntity<BalanceValue> responseEntity = restTemplate.exchange(
+				CREATE_JAR, HttpMethod.POST, entity, BalanceValue.class);
+		if (responseEntity.getStatusCode() == HttpStatus.CREATED) {
+			return Optional.of(responseEntity.getBody());
+		}
 		return Optional.empty();
+	}
+
+	private HttpHeaders getHttpHeaders(String token) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setBearerAuth(token);
+		headers.set("X-idempotence-uuid", String.valueOf(UUID.randomUUID()));
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		return headers;
 	}
 
 	@JsonSerialize

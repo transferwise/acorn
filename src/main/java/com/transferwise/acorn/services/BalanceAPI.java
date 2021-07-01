@@ -1,6 +1,7 @@
 package com.transferwise.acorn.services;
 
 import com.transferwise.acorn.models.BalanceResponse;
+import com.transferwise.acorn.models.OpenBalanceCommand;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,5 +18,5 @@ public interface BalanceAPI {
     Optional<List<BalanceValue>> findActiveBalances(String token,
                                                            Long profileId);
 
-    Optional<BalanceValue> createBalanceJar(com.transferwise.acorn.models.OpenBalanceCommand openBalanceCommand);
+    Optional<BalanceValue> createBalanceJar(Long profileId, String token, OpenBalanceCommand openBalanceCommand);
 }

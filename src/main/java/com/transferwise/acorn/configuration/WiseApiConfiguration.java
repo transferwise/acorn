@@ -8,7 +8,7 @@ import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
-@Component
+//@Component
 public class WiseApiConfiguration {
 
 	@Value("${wise.api-url}")
