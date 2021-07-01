@@ -10,6 +10,6 @@ import java.math.BigDecimal;
 @Builder
 @Data
 public class RuleDecision {
-	private Boolean passed;
+	private boolean passed;
 	private BigDecimal amountToForwardToJar;
 }

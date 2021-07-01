@@ -17,11 +17,7 @@ Make sure you have java 15 and docker installed.
 2.  Go to `src/java/resources/application.yml` to edit your ruleset. Each currency can have specific threshold, and there's also a default ruleset. For a transfer from your balance to your jar to be triggered, the amount received must between the min and max value for the balance currency, and the amount of money to be transferred will be equal to the percentage defined in that same rule set multiplied by the received amount. In the absence of a currency specific ruleset, the default ruleset will apply as defined in `wise.ruleset.default`.
 3.  Go to wise.com/settings, get a personal token with full access and add it to the environment variable "WISE_TOKEN"
     NB: you need to keep this token secret. It will have full access to your account through the API.
-4.  Now go to the root of this repository, and Run the following commands
-   - `./gradlew bootJar`
-   - `./gradlew docker`
-   - `cd docker`
-   - `docker-compose up`
+4.  Now go to the root of this repository and run `bash start.bash`, this will package up the application in a docker container and run it alongside an ngrok container.
 4. The console will now show up some ngrok url from the ngrok customer. Copy the one that starts with https to your clipboard.
    ![WebHook Setup](resources/webhook-setup.png)
 5. Go to wise.com, login, then settings > webhooks. Choose deposit events and use the ngrok https url and then append `/balance-deposits` to it.

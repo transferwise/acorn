@@ -20,7 +20,7 @@ public class BalanceService {
     @Async
     public void handleIncomingDepositWebhooksEvent(BalanceDeposit balanceDeposit) {
         RuleDecision ruleDecision = ruleSetEngine.applyRules(balanceDeposit.getCurrency(), balanceDeposit.getAmount());
-        if (Boolean.FALSE.equals(ruleDecision.getPassed())) {
+        if (!ruleDecision.isPassed()) {
             return;
         }
         Long profileId = balanceDeposit.getResource().getProfileId();
