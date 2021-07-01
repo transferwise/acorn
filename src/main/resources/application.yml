@@ -1,2 +1,18 @@
 server:
   port: 50550
+
+wise:
+  api-url: https://api.sandbox.transferwise.tech
+  oauth-token: whatever
+  ruleset:
+    default:
+      min-deposit-amount: 10
+      max-deposit-amount: 200
+      percentage: 100
+    EUR:
+      min-deposit-amount: 20
+      max-deposit-amount: 200
+        percentage: 50
+    GBP:
+      min-deposit-amount: 25
+      max-deposit-amount: 200
