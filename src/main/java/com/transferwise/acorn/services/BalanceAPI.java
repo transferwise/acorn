@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,10 +55,10 @@ public class BalanceAPI {
         return Optional.empty();
     }
 
-    public Optional<BalancesResponse> findActiveBalances(String token,
+    public Optional<List<OpenBalanceCommand>> findActiveBalances(String token,
                                                            Long profileId) {
 
-        final String BALANCES_URL = BASE_URL + "/gateway/v4/profiles/" + profileId + "/balances";
+        final String BALANCES_URL = BASE_URL + "/gateway/v4/profiles/" + profileId + "/balances?types=SAVINGS,STANDARD";
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -66,18 +67,22 @@ public class BalanceAPI {
         headers.set("X-idempotence-uuid", String.valueOf(UUID.randomUUID()));
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        var payload = BalancesPayload.builder()
-                .types(List.of(BalanceType.STANDARD, BalanceType.SAVINGS))
-                .includeHidden(false)
-                .build();
 
-        var entity = new HttpEntity<>(payload, headers);
+        var entity = new HttpEntity<>(headers);
 
+
+
+        /*
         ResponseEntity<BalancesResponse> responseEntity = restTemplate.
-                postForEntity(BALANCES_URL, entity, BalancesResponse.class);
+                getForEntity(BALANCES_URL, entity, BalancesResponse.class);
+         */
+
+        ResponseEntity<Object> responseEntity = restTemplate.exchange(
+                BALANCES_URL, HttpMethod.GET, entity, Object.class);
 
         if (responseEntity.getStatusCode() == HttpStatus.CREATED) {
-            return Optional.of(responseEntity.getBody());
+            List<OpenBalanceCommand> body = (List<OpenBalanceCommand>) responseEntity.getBody();
+            return Optional.of(body);
         }
         return Optional.empty();
     }

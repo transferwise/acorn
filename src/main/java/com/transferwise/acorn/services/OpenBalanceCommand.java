@@ -6,7 +6,9 @@ import lombok.Data;
 
 import java.util.Date;
 
-public class BalanceValue {
+@JsonSerialize
+@Data
+public class OpenBalanceCommand {
 
 	int id;
 	String currency;

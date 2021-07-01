@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class BalanceService {
@@ -22,10 +24,18 @@ public class BalanceService {
             return;
         }
         final Long profileId = balanceCredit.getResource().getProfileId();
+
+        final var activeBalances = balanceAPI.findActiveBalances(token,profileId);
+        if (activeBalances.isEmpty()){
+            return;
+        }
+        System.out.println(activeBalances);
+
+
         final String currency = balanceCredit.getCurrency();
         // TODO: is this correct?
         final Long sourceJarId = balanceCredit.getResource().getId();
-        final Long targetJarId = getTargetJarId();
+        final Long targetJarId = getTargetJarId(activeBalances.get());
 
         balanceAPI.makeBalanceToBalanceTransfer(
                 token,
@@ -38,7 +48,11 @@ public class BalanceService {
     }
 
 
-    private Long getTargetJarId() {
+    private Long getTargetJarId(List<OpenBalanceCommand> balances) {
+        // TODO
+        int targerJarId = -1;
+
+
         return 75555L;
     }
 
