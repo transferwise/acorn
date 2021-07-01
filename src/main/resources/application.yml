@@ -1,9 +1,7 @@
 server:
   port: 50550
-api:
-  token: janes
 wise:
-  api-url: https://wise.com
+  api-url: https://api.wise.com
   oauth-token: whatever
   ruleset:
     default:
