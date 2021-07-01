@@ -18,7 +18,7 @@ Make sure you have java 15 and docker installed.
 3.  Go to wise.com/settings, get a personal token with full access and add it to the environment variable "WISE_TOKEN"
     NB: you need to keep this token secret. It will have full access to your account through the API.
 4.  Now go to the root of this repository and run `bash start.bash`, this will package up the application in a docker container and run it alongside an ngrok container.
-4. The console will now show up some ngrok url from the ngrok customer. Copy the one that starts with https to your clipboard.
+4. The console will now show tons of logs, including the ngrok url from the ngrok container. Copy the one that starts with https to your clipboard.
    ![WebHook Setup](resources/webhook-setup.png)
 5. Go to wise.com, login, then settings > webhooks. Choose deposit events and use the ngrok https url and then append `/balance-deposits` to it.
 6. You're all set, enjoy!
