@@ -1,9 +1,9 @@
 server:
   port: 50550
 api:
-  token: whatever
+  token: janes
 wise:
-  api-url: https://api.sandbox.transferwise.tech
+  api-url: https://wise.com
   oauth-token: whatever
   ruleset:
     default:

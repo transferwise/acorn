@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,18 +32,3 @@ public class TransferController {
         return !httpHeaders.containsKey(X_TEST_NOTIFICATION) && payload.getEventType().equals("balances#credit") && payload.getSchemaVersion().equals("2.0.0");
     }
 }
-/*
-{
-    "apiToken": "979999c9-10cf-4da2-9f58-77a7edb57d03",
-    "profileId": 25,
-    "sourceBalanceId": 3324,
-    "currency": "EUR",
-    "incomingDepositAmount": 100,
-    "payments": [
-        1.1
-    ],
-    "targetBalanceIds": [
-        75555
-    ]
-}
- */

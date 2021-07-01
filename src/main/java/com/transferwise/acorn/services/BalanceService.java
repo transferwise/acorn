@@ -1,6 +1,8 @@
 package com.transferwise.acorn.services;
 
 import com.transferwise.acorn.models.BalanceCredit;
+import com.transferwise.acorn.models.Icon;
+import com.transferwise.acorn.models.OpenBalanceCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -27,11 +29,16 @@ public class BalanceService {
         final Long profileId = balanceCredit.getResource().getProfileId();
 
         final var activeBalances = balanceAPI.findActiveBalances(token,profileId);
+        if (activeBalances.isEmpty()){
+            return;
+        }
 
         final String currency = balanceCredit.getCurrency();
-        final Long sourceJarId = balanceCredit.getResource().getId();
-        final Long targetJarId = getTargetJarId(balanceCredit.getCurrency(), activeBalances.get());
-
+        final Long sourceJarId = getSourceJarId(activeBalances, currency);
+        final Long targetJarId = getTargetJarId(profileId,balanceCredit.getCurrency(), activeBalances.get());
+        if (targetJarId == null){
+            return;
+        }
 
         balanceAPI.makeBalanceToBalanceTransfer(
                 token,
@@ -43,7 +50,13 @@ public class BalanceService {
         );
     }
 
-    private Long getTargetJarId(String currency, List<BalanceValue> balances) {
+    private Long getSourceJarId(java.util.Optional<List<BalanceValue>> activeBalances, String currency) {
+        return activeBalances.get().stream().filter(it -> "STANDARD".equals(it.getType()))
+                .filter(it -> currency.equals(it.getCurrency()))
+                .filter(it -> it.visible).findFirst().map(it -> (Long.valueOf(it.id))).get();
+    }
+
+    private Long getTargetJarId(Long profileId, String currency, List<BalanceValue> balances) {
         final var currentTargetJarId = balances.stream()
                 .filter(openBalanceCommand -> openBalanceCommand.visible)
                 .filter(openBalanceCommand -> openBalanceCommand.currency.equals(currency))
@@ -54,8 +67,18 @@ public class BalanceService {
         if (currentTargetJarId.isPresent()) {
             return Long.valueOf(currentTargetJarId.get());
         }
-        // TODO make new jar, return its ID
+        final var newName = "SAVINGS "+currency;
+        final var command = OpenBalanceCommand.builder()
+                .currency(currency)
+                .type(JAR_TYPE)
+                .name(newName)
+                .icon(new Icon("EMOJI","\uD83C\uDF4D"))
+                .build();
 
-        return 75555L;
+        final var newBalance = balanceAPI.createBalanceJar(profileId,token,command);
+        if (newBalance.isPresent()){
+            return Long.valueOf(newBalance.get().id);
+        }
+        return null;
     }
 }
