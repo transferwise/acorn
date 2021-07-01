@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("v1/acorn")
@@ -17,10 +16,14 @@ public class TransferController {
 
     @PostMapping("/transfer")
     public ResponseEntity transfer(@RequestBody BalanceCreditEvent payload) {
-        if(payload.getEventType().equals("balances#credit") && payload.getSchemaVersion().equals("2.0.0")) {
+        if (isSuitableBalanceEvent(payload)) {
             transferService.handleIncomingDepositWebhooksEvent(payload.getData());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    private boolean isSuitableBalanceEvent(BalanceCreditEvent payload){
+        return payload.getEventType().equals("balances#credit") && payload.getSchemaVersion().equals("2.0.0");
     }
 }
 /*

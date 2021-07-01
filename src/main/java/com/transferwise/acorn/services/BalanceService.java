@@ -1,48 +1,48 @@
 package com.transferwise.acorn.services;
 
 import com.transferwise.acorn.models.BalanceCredit;
-import com.transferwise.acorn.models.BalanceResponse;
-import com.transferwise.acorn.models.BalanceTransferPayload;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class BalanceService {
 
     private final BalanceAPI balanceAPI;
+    private final SavingsService savingsService;
+    @Value("${api.token}")
+    private String token;
 
     @Async
-    public List<BalanceResponse> handleIncomingDepositWebhooksEvent(BalanceCredit balanceCredit) {
-        if (balanceCredit.getTransactionType().equals("credit")) {
-            return Collections.emptyList();
+    public void handleIncomingDepositWebhooksEvent(BalanceCredit balanceCredit) {
+        final double toBeSavedAmount = savingsService.savingsAmount(balanceCredit);
+        if (toBeSavedAmount == 0) {
+            return;
         }
-        List<BalanceResponse> results = new LinkedList<>();
+        final Long profileId = balanceCredit.getResource().getProfileId();
+        final String currency = balanceCredit.getCurrency();
+        // TODO: is this correct?
+        final Long sourceJarId = balanceCredit.getResource().getId();
+        final Long targetJarId = getTargetJarId();
 
-
-        return results;
+        balanceAPI.makeBalanceToBalanceTransfer(
+                token,
+                toBeSavedAmount,
+                currency,
+                profileId,
+                sourceJarId,
+                targetJarId
+        );
     }
 
-    public List<BalanceResponse> handleIncomingDepositEvent(BalanceTransferPayload payload) {
-        if (payload.getPayments().size() != payload.getTargetBalanceIds().size()) {
-            return Collections.emptyList();
-        }
-        List<BalanceResponse> results = new LinkedList<>();
 
-        for (int i = 0; i < payload.getPayments().size(); i++) {
-            final var payment = payload.getPayments().get(i);
-            final var targetBalanceId = payload.getTargetBalanceIds().get(i);
-            makeBalanceToBalanceTransfer(payload, payment, targetBalanceId).ifPresent(results::add);
-        }
-        return results;
+    private Long getTargetJarId() {
+        return 75555L;
     }
 
+    /*
     private Optional<BalanceResponse> makeBalanceToBalanceTransfer(BalanceTransferPayload payload, double payment, int targetBalanceId) {
         return balanceAPI.makeBalanceToBalanceTransfer(
                 payload.getApiToken(),
@@ -53,4 +53,5 @@ public class BalanceService {
                 targetBalanceId
         );
     }
+     */
 }

@@ -1,10 +1,14 @@
 package com.transferwise.acorn.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 public class Resource {
-	private String type;
-	private Long id;
-	private Long profileId;
+    @JsonProperty("type")
+    private String type;
+    @JsonProperty("id")
+    private Long id;
+    @JsonProperty("profile_id")
+    private Long profileId;
 }
