@@ -24,7 +24,7 @@ import java.util.UUID;
 public class RestTemplateBalanceAPI implements BalanceAPI {
 
 	private static final String BASE_URL = "https://sandbox.transferwise.tech";
-	private static final String CREATE_JAR = BASE_URL + "/gateway/v4/profiles/${profileId}/balances";
+	private static final String CREATE_JAR = BASE_URL + "/gateway/v4/profiles/{profileId}/balances";
 
 	@Override
 	public Optional<BalanceResponse> makeBalanceToBalanceTransfer(String token,
@@ -79,7 +79,7 @@ public class RestTemplateBalanceAPI implements BalanceAPI {
 		RestTemplate restTemplate = new RestTemplate();
 		var entity = new HttpEntity<>(openBalanceCommand, getHttpHeaders(token));
 		ResponseEntity<BalanceValue> responseEntity = restTemplate.exchange(
-				CREATE_JAR, HttpMethod.POST, entity, BalanceValue.class);
+				CREATE_JAR, HttpMethod.POST, entity, BalanceValue.class,profileId);
 		if (responseEntity.getStatusCode() == HttpStatus.CREATED) {
 			return Optional.of(responseEntity.getBody());
 		}

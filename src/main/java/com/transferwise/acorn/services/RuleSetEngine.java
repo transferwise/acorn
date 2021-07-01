@@ -14,6 +14,7 @@ import java.util.Optional;
 public class RuleSetEngine {
 	private final RuleSetRepository ruleSetRepository;
 
+	/*
 	public RuleDecision applyRules(String currency, BigDecimal amount) {
 		Optional<Rule> currencyRule = ruleSetRepository.getRuleForCurrency(currency);
 
@@ -35,4 +36,6 @@ public class RuleSetEngine {
 				.amountToForwardToJar(BigDecimal.ZERO)
 				.build();
 	}
+
+	 */
 }
