@@ -21,7 +21,7 @@ Make sure you have java 15 and docker installed.
    - `docker-compose up`
 4. The console will now show up some ngrok url from the ngrok customer. Copy it to your clipboard (the https one).
    ![WebHook Setup](resources/webhook-setup.png)
-5. Go to wise.com, login, then settings > webhooks. Choose deposit events and use the ngrok https url and then append `/v1/acorn/transfer` to it.
+5. Go to wise.com, login, then settings > webhooks. Choose deposit events and use the ngrok https url and then append `/balance-deposits` to it.
 6. You're all set, enjoy!
 
 

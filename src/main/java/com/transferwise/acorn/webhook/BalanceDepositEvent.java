@@ -1,4 +1,4 @@
-package com.transferwise.acorn.models;
+package com.transferwise.acorn.webhook;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -6,9 +6,9 @@ import lombok.Data;
 import java.time.Instant;
 
 @Data
-public class BalanceCreditEvent {
+public class BalanceDepositEvent {
 	@JsonProperty("data")
-	private BalanceCredit data;
+	private BalanceDeposit data;
 	@JsonProperty("subscription_id")
 	private String subscriptionId;
 	@JsonProperty("event_type")
