@@ -2,6 +2,7 @@ package com.transferwise.acorn.services;
 
 import com.transferwise.acorn.balance.InvalidBalanceException;
 import com.transferwise.acorn.models.BalanceTransferPayload;
+import com.transferwise.acorn.models.BalanceType;
 import com.transferwise.acorn.models.Icon;
 import com.transferwise.acorn.models.MoneyValue;
 import com.transferwise.acorn.models.OpenBalanceCommand;
@@ -22,12 +23,10 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 public class BalanceService {
 
-    private static final String JAR_TYPE = "SAVINGS";
     public static final String EMOJI_PINEAPPLE = "\uD83C\uDF4D";
     private final BalanceAPI balanceAPI;
     public static final String EMOJI = "EMOJI";
     public static final String SAVINGS_JAR_NAME_PREFIX = "SAVINGS ";
-    public static final String STANDARD_JAR_TYPE = "STANDARD";
     private final RuleSetEngine ruleSetEngine;
 
     @Async
@@ -59,14 +58,14 @@ public class BalanceService {
     }
 
     private Long getSourceJarId(List<BalanceValue> balances, String currency) {
-        var predicates = getFilterPredicates(STANDARD_JAR_TYPE, currency);
+        var predicates = getFilterPredicates(BalanceType.STANDARD, currency);
         return balances.stream()
                 .filter(predicates.stream().reduce(x->true, Predicate::and))
                 .findFirst().map(BalanceValue::getId).orElseThrow(() -> new InvalidBalanceException("No Regular Visible Balance Available for currency " + currency));
     }
 
     private Long getTargetJarId(Long profileId, String currency, List<BalanceValue> balances) {
-        var predicates = getFilterPredicates(JAR_TYPE, currency);
+        var predicates = getFilterPredicates(BalanceType.SAVINGS, currency);
         Optional<Long> currentTargetJarId = balances.stream()
                 .filter(predicates.stream().reduce(x->true, Predicate::and))
                 .filter(balance -> balance.getName().startsWith(SAVINGS_JAR_NAME_PREFIX))
@@ -78,7 +77,7 @@ public class BalanceService {
         String newName = "Savings " + currency;
         OpenBalanceCommand command = OpenBalanceCommand.builder()
                 .currency(currency)
-                .type(JAR_TYPE)
+                .type(BalanceType.SAVINGS.name())
                 .name(newName)
                 .icon(new Icon(EMOJI, EMOJI_PINEAPPLE))
                 .build();
@@ -86,9 +85,9 @@ public class BalanceService {
         return balanceAPI.createBalanceJar(profileId, command).getId();
     }
 
-    private List<Predicate<BalanceValue>> getFilterPredicates(String type, String currency) {
+    private List<Predicate<BalanceValue>> getFilterPredicates(BalanceType type, String currency) {
         Predicate<BalanceValue> visibilityPredicate = BalanceValue::isVisible;
-        Predicate<BalanceValue> currencyPredicate = balance -> type.equals(balance.getType());
+        Predicate<BalanceValue> currencyPredicate = balance -> type.name().equals(balance.getType());
         Predicate<BalanceValue> typePredicate = balance -> currency.equals(balance.getCurrency());
         return Arrays.asList(visibilityPredicate, currencyPredicate, typePredicate);
     }
