@@ -26,7 +26,7 @@ public class BalanceService {
     public static final String EMOJI_PINEAPPLE = "\uD83C\uDF4D";
     private final BalanceAPI balanceAPI;
     public static final String EMOJI = "EMOJI";
-    public static final String SAVINGS_JAR_NAME_PREFIX = "SAVINGS ";
+    public static final String SAVINGS_JAR_NAME_PREFIX = "Savings ";
     private final RuleSetEngine ruleSetEngine;
 
     @Async
@@ -74,7 +74,7 @@ public class BalanceService {
         if (currentTargetJarId.isPresent()) {
             return currentTargetJarId.get();
         }
-        String newName = "Savings " + currency;
+        String newName = SAVINGS_JAR_NAME_PREFIX  + currency;
         OpenBalanceCommand command = OpenBalanceCommand.builder()
                 .currency(currency)
                 .type(BalanceType.SAVINGS.name())
