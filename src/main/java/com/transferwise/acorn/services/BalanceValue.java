@@ -10,18 +10,18 @@ import java.util.Date;
 @Data
 public class BalanceValue {
 
-	Long id;
-	String currency;
-	Amount amount;
-	ReservedAmount reservedAmount;
-	TotalWorth totalWorth;
-	String type;
-	String name;
-	Icon icon;
-	String investmentState;
-	Date creationTime;
-	Date modificationTime;
-	boolean visible;
+	private Long id;
+	private String currency;
+	private Amount amount;
+	private ReservedAmount reservedAmount;
+	private TotalWorth totalWorth;
+	private String type;
+	private String name;
+	private Icon icon;
+	private String investmentState;
+	private Date creationTime;
+	private Date modificationTime;
+	private boolean visible;
 
 	@JsonSerialize
 	@Data
