@@ -9,15 +9,16 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class BalanceService {
 
     private static final String JAR_TYPE = "SAVINGS";
-    private final BalanceAPI balanceAPI;
+    private final RestTemplateBalanceAPI balanceAPI;
     private final SavingsService savingsService;
-    @Value("${api.token}")
+    @Value("${wise.oauth-token}")
     private String token;
 
     @Async
@@ -27,9 +28,10 @@ public class BalanceService {
             return;
         }
         final Long profileId = balanceCredit.getResource().getProfileId();
+        final var activeBalances = balanceAPI.findActiveBalances(token, profileId);
 
-        final var activeBalances = balanceAPI.findActiveBalances(token,profileId);
-        if (activeBalances.isEmpty()){
+
+        if (activeBalances.isEmpty()) {
             return;
         }
 
@@ -64,8 +66,8 @@ public class BalanceService {
                 .filter(openBalanceCommand -> openBalanceCommand.name.startsWith("SAVINGS "))
                 .map(openBalanceCommand -> openBalanceCommand.id)
                 .findFirst();
-        if (currentTargetJarId.isPresent()) {
-            return Long.valueOf(currentTargetJarId.get());
+        if (command.isPresent()) {
+            return Optional.of((long) command.get().id);
         }
         final var newName = "SAVINGS "+currency;
         final var command = OpenBalanceCommand.builder()
