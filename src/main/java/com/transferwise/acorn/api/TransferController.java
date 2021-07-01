@@ -3,6 +3,7 @@ package com.transferwise.acorn.api;
 import com.transferwise.acorn.models.BalanceCreditEvent;
 import com.transferwise.acorn.services.BalanceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,18 +13,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("v1/acorn")
 public class TransferController {
 
+    public static final String X_TEST_NOTIFICATION = "X-Test-Notification";
     private final BalanceService transferService;
 
     @PostMapping("/transfer")
-    public ResponseEntity transfer(@RequestBody BalanceCreditEvent payload) {
-        if (isSuitableBalanceEvent(payload)) {
+    public ResponseEntity transfer(@RequestBody BalanceCreditEvent payload, HttpHeaders httpHeaders) {
+        if (isRealBalanceEvent(payload, httpHeaders)) {
             transferService.handleIncomingDepositWebhooksEvent(payload.getData());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    private boolean isSuitableBalanceEvent(BalanceCreditEvent payload){
-        return payload.getEventType().equals("balances#credit") && payload.getSchemaVersion().equals("2.0.0");
+    private boolean isRealBalanceEvent(BalanceCreditEvent payload, HttpHeaders httpHeaders){
+        return !httpHeaders.containsKey(X_TEST_NOTIFICATION) && payload.getEventType().equals("balances#credit") && payload.getSchemaVersion().equals("2.0.0");
     }
 }
 /*
