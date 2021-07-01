@@ -10,7 +10,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,8 +37,8 @@ public class BalanceService {
 
         final String currency = balanceCredit.getCurrency();
         final Long sourceJarId = getSourceJarId(activeBalances, currency);
-        final Long targetJarId = getTargetJarId(profileId,balanceCredit.getCurrency(), activeBalances.get());
-        if (targetJarId == null){
+        final Long targetJarId = getTargetJarId(profileId, balanceCredit.getCurrency(), activeBalances.get());
+        if (targetJarId == null) {
             return;
         }
 
@@ -67,21 +66,18 @@ public class BalanceService {
                 .filter(openBalanceCommand -> openBalanceCommand.name.startsWith("SAVINGS "))
                 .map(openBalanceCommand -> openBalanceCommand.id)
                 .findFirst();
-        if (command.isPresent()) {
-            return Optional.of((long) command.get().id);
+        if (currentTargetJarId.isPresent()) {
+            return Long.valueOf(currentTargetJarId.get());
         }
-        final var newName = "SAVINGS "+currency;
+        final var newName = "SAVINGS " + currency;
         final var command = OpenBalanceCommand.builder()
                 .currency(currency)
                 .type(JAR_TYPE)
                 .name(newName)
-                .icon(new Icon("EMOJI","\uD83C\uDF4D"))
+                .icon(new Icon("EMOJI", "\uD83C\uDF4D"))
                 .build();
 
-        final var newBalance = balanceAPI.createBalanceJar(profileId,token,command);
-        if (newBalance.isPresent()){
-            return Long.valueOf(newBalance.get().id);
-        }
-        return null;
+        final var newBalance = balanceAPI.createBalanceJar(profileId, token, command);
+        return newBalance.map(balanceValue -> Long.valueOf(balanceValue.id)).orElse(null);
     }
 }
