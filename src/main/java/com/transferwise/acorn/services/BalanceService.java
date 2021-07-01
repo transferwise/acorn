@@ -7,6 +7,8 @@ import com.transferwise.acorn.models.Icon;
 import com.transferwise.acorn.models.MoneyValue;
 import com.transferwise.acorn.models.OpenBalanceCommand;
 import com.transferwise.acorn.models.RuleDecision;
+import com.transferwise.acorn.models.*;
+import com.transferwise.acorn.webhook.BalanceDeposit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -29,17 +31,25 @@ public class BalanceService {
     private final RuleSetEngine ruleSetEngine;
 
     @Async
-    public void handleIncomingDepositWebhooksEvent(BalanceCredit balanceCredit) {
-        RuleDecision ruleDecision = ruleSetEngine.applyRules(balanceCredit.getCurrency(), balanceCredit.getAmount());
+    public void handleIncomingDepositWebhooksEvent(BalanceDeposit balanceDeposit) {
+        RuleDecision ruleDecision = ruleSetEngine.applyRules(balanceDeposit.getCurrency(), balanceDeposit.getAmount());
         if (Boolean.FALSE.equals(ruleDecision.getPassed())) {
             return;
         }
-        final Long profileId = balanceCredit.getResource().getProfileId();
-        final var activeBalances = balanceAPI.findActiveBalances(profileId);
+        Long profileId = balanceDeposit.getResource().getProfileId();
+        List<BalanceValue> activeBalances = balanceAPI.findActiveBalances(profileId);
 
-        final String currency = balanceCredit.getCurrency();
-        final Long sourceJarId = getSourceJarId(activeBalances, currency);
-        final Long targetJarId = getTargetJarId(profileId, balanceCredit.getCurrency(), activeBalances);
+
+        if (activeBalances.isEmpty()) {
+            return;
+        }
+
+        String currency = balanceDeposit.getCurrency();
+        Long sourceJarId = getSourceJarId(activeBalances, currency);
+        Long targetJarId = getTargetJarId(profileId, balanceDeposit.getCurrency(), activeBalances);
+        if (targetJarId == null) {
+            return;
+        }
 
         BalanceTransferPayload balanceTransferPayload = BalanceTransferPayload.builder()
                 .amount(new MoneyValue(ruleDecision.getAmountToForwardToJar(), currency))
