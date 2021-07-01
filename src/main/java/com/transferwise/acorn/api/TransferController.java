@@ -1,9 +1,11 @@
 package com.transferwise.acorn.api;
 
+import com.transferwise.acorn.models.BalanceCreditEvent;
 import com.transferwise.acorn.models.BalanceResponse;
 import com.transferwise.acorn.models.BalanceTransferPayload;
 import com.transferwise.acorn.services.BalanceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,8 +22,11 @@ public class TransferController {
     private final BalanceService transferService;
 
     @PostMapping("/transfer")
-    public ResponseEntity<List<BalanceResponse>> transfer(@RequestBody BalanceTransferPayload payload) {
-        return ResponseEntity.ok(transferService.handleIncomingDepositEvent(payload));
+    public ResponseEntity transfer(@RequestBody BalanceCreditEvent payload) {
+        if(payload.getEventType().equals("balances#credit") && payload.getSchemaVersion().equals("2.0.0")) {
+            transferService.handleIncomingDepositWebhooksEvent(payload.getData());
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
 /*

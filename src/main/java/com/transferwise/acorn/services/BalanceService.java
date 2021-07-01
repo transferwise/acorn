@@ -1,8 +1,10 @@
 package com.transferwise.acorn.services;
 
+import com.transferwise.acorn.models.BalanceCredit;
 import com.transferwise.acorn.models.BalanceResponse;
 import com.transferwise.acorn.models.BalanceTransferPayload;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -16,6 +18,16 @@ public class BalanceService {
 
     private final BalanceAPI balanceAPI;
 
+    @Async
+    public List<BalanceResponse> handleIncomingDepositWebhooksEvent(BalanceCredit balanceCredit) {
+        if (balanceCredit.getTransactionType().equals("credit")) {
+            return Collections.emptyList();
+        }
+        List<BalanceResponse> results = new LinkedList<>();
+
+
+        return results;
+    }
 
     public List<BalanceResponse> handleIncomingDepositEvent(BalanceTransferPayload payload) {
         if (payload.getPayments().size() != payload.getTargetBalanceIds().size()) {
