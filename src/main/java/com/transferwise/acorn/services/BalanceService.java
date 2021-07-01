@@ -1,6 +1,10 @@
 package com.transferwise.acorn.services;
 
-import com.transferwise.acorn.models.*;
+import com.transferwise.acorn.models.BalanceTransferPayload;
+import com.transferwise.acorn.models.Icon;
+import com.transferwise.acorn.models.MoneyValue;
+import com.transferwise.acorn.models.OpenBalanceCommand;
+import com.transferwise.acorn.models.RuleDecision;
 import com.transferwise.acorn.webhook.BalanceDeposit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -48,27 +52,33 @@ public class BalanceService {
     }
 
     private Long getSourceJarId(List<BalanceValue> activeBalances, String currency) {
-        return activeBalances.stream().filter(it -> "STANDARD".equals(it.getType()))
+        return activeBalances.stream()
+                .filter(it -> "STANDARD".equals(it.getType()))
                 .filter(it -> currency.equals(it.getCurrency()))
-                .filter(it -> it.visible).findFirst().map(it -> (Long.valueOf(it.id))).get();
+                .filter(it -> it.visible)
+                .findFirst()
+                .map(it -> (it.id))
+                .orElse(null);
     }
 
     private Long getTargetJarId(Long profileId, String currency, List<BalanceValue> balances) {
+        String savingsJarName = "Savings " + currency;
+
         Optional<Long> currentTargetJarId = balances.stream()
+                .filter(openBalanceCommand -> JAR_TYPE.equals(openBalanceCommand.type))
+                .filter(openBalanceCommand -> openBalanceCommand.name.equals(savingsJarName))
                 .filter(openBalanceCommand -> openBalanceCommand.visible)
                 .filter(openBalanceCommand -> openBalanceCommand.currency.equals(currency))
-                .filter(openBalanceCommand -> JAR_TYPE.equals(openBalanceCommand.type))
-                .filter(openBalanceCommand -> openBalanceCommand.name.startsWith("SAVINGS "))
                 .map(openBalanceCommand -> openBalanceCommand.id)
                 .findFirst();
         if (currentTargetJarId.isPresent()) {
             return currentTargetJarId.get();
         }
-        String newName = "SAVINGS " + currency;
+
         OpenBalanceCommand command = OpenBalanceCommand.builder()
                 .currency(currency)
                 .type(JAR_TYPE)
-                .name(newName)
+                .name(savingsJarName)
                 .icon(new Icon("EMOJI", "\uD83C\uDF4D"))
                 .build();
 
