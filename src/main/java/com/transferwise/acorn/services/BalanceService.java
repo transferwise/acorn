@@ -62,7 +62,7 @@ public class BalanceService {
         var predicates = getFilterPredicates(STANDARD_JAR_TYPE, currency);
         return balances.stream()
                 .filter(predicates.stream().reduce(x->true, Predicate::and))
-                .findFirst().map(balance -> (Long.valueOf(balance.getId()))).orElseThrow(() -> new InvalidBalanceException("No Regular Visible Balance Available for currency " + currency));
+                .findFirst().map(BalanceValue::getId).orElseThrow(() -> new InvalidBalanceException("No Regular Visible Balance Available for currency " + currency));
     }
 
     private Long getTargetJarId(Long profileId, String currency, List<BalanceValue> balances) {
@@ -70,12 +70,12 @@ public class BalanceService {
         Optional<Long> currentTargetJarId = balances.stream()
                 .filter(predicates.stream().reduce(x->true, Predicate::and))
                 .filter(balance -> balance.getName().startsWith(SAVINGS_JAR_NAME_PREFIX))
-                .map(balance -> balance.getId())
+                .map(BalanceValue::getId)
                 .findFirst();
         if (currentTargetJarId.isPresent()) {
             return currentTargetJarId.get();
         }
-        String newName = "SAVINGS " + currency;
+        String newName = "Savings " + currency;
         OpenBalanceCommand command = OpenBalanceCommand.builder()
                 .currency(currency)
                 .type(JAR_TYPE)
@@ -87,7 +87,7 @@ public class BalanceService {
     }
 
     private List<Predicate<BalanceValue>> getFilterPredicates(String type, String currency) {
-        Predicate<BalanceValue> visibilityPredicate = balance -> balance.isVisible();
+        Predicate<BalanceValue> visibilityPredicate = BalanceValue::isVisible;
         Predicate<BalanceValue> currencyPredicate = balance -> type.equals(balance.getType());
         Predicate<BalanceValue> typePredicate = balance -> currency.equals(balance.getCurrency());
         return Arrays.asList(visibilityPredicate, currencyPredicate, typePredicate);
