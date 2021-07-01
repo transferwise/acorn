@@ -3,6 +3,7 @@ package com.transferwise.acorn.services;
 import com.transferwise.acorn.models.BalanceCredit;
 import com.transferwise.acorn.models.Icon;
 import com.transferwise.acorn.models.OpenBalanceCommand;
+import com.transferwise.acorn.models.RuleDecision;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -17,14 +18,14 @@ public class BalanceService {
 
     private static final String JAR_TYPE = "SAVINGS";
     private final RestTemplateBalanceAPI balanceAPI;
-    private final SavingsService savingsService;
+    private final RuleSetEngine ruleSetEngine;
     @Value("${wise.oauth-token}")
     private String token;
 
     @Async
     public void handleIncomingDepositWebhooksEvent(BalanceCredit balanceCredit) {
-        final double toBeSavedAmount = savingsService.savingsAmount(balanceCredit);
-        if (toBeSavedAmount == 0) {
+        RuleDecision ruleDecision = ruleSetEngine.applyRules(balanceCredit.getCurrency(), balanceCredit.getAmount());
+        if (Boolean.FALSE.equals(ruleDecision.getPassed())) {
             return;
         }
         final Long profileId = balanceCredit.getResource().getProfileId();
@@ -44,7 +45,7 @@ public class BalanceService {
 
         balanceAPI.makeBalanceToBalanceTransfer(
                 token,
-                toBeSavedAmount,
+                ruleDecision.getAmountToForwardToJar().doubleValue(),
                 currency,
                 profileId,
                 sourceJarId,
