@@ -31,39 +31,57 @@ public class BalanceService {
         final Long profileId = balanceCredit.getResource().getProfileId();
         final var activeBalances = balanceAPI.findActiveBalances(token, profileId);
 
+
         if (activeBalances.isEmpty()) {
             return;
         }
 
         final String currency = balanceCredit.getCurrency();
-        final Long sourceJarId = balanceCredit.getResource().getId();
-        final Optional<Long> targetJarId = getTargetJarId(profileId, balanceCredit.getCurrency(), activeBalances.get());
-        targetJarId.ifPresent
-                (aLong -> balanceAPI.makeBalanceToBalanceTransfer
-                        (token, ruleDecision.getAmountToForwardToJar().doubleValue(), currency, profileId, sourceJarId, aLong));
+        final Long sourceJarId = getSourceJarId(activeBalances, currency);
+        final Long targetJarId = getTargetJarId(profileId,balanceCredit.getCurrency(), activeBalances.get());
+        if (targetJarId == null){
+            return;
+        }
+
+        balanceAPI.makeBalanceToBalanceTransfer(
+                token,
+                ruleDecision.getAmountToForwardToJar().doubleValue(),
+                currency,
+                profileId,
+                sourceJarId,
+                targetJarId
+        );
     }
 
-    private Optional<Long> getTargetJarId(Long profileId, String currency, List<BalanceValue> balances) {
-        var command = balances.stream()
-                .filter(balanceValue -> balanceValue.visible)
-                .filter(balanceValue -> balanceValue.currency.equals(currency))
-                .filter(balanceValue -> JAR_TYPE.equals(balanceValue.type))
-                .filter(balanceValue -> balanceValue.name.startsWith("SAVINGS "))
+    private Long getSourceJarId(java.util.Optional<List<BalanceValue>> activeBalances, String currency) {
+        return activeBalances.get().stream().filter(it -> "STANDARD".equals(it.getType()))
+                .filter(it -> currency.equals(it.getCurrency()))
+                .filter(it -> it.visible).findFirst().map(it -> (Long.valueOf(it.id))).get();
+    }
+
+    private Long getTargetJarId(Long profileId, String currency, List<BalanceValue> balances) {
+        final var currentTargetJarId = balances.stream()
+                .filter(openBalanceCommand -> openBalanceCommand.visible)
+                .filter(openBalanceCommand -> openBalanceCommand.currency.equals(currency))
+                .filter(openBalanceCommand -> JAR_TYPE.equals(openBalanceCommand.type))
+                .filter(openBalanceCommand -> openBalanceCommand.name.startsWith("SAVINGS "))
+                .map(openBalanceCommand -> openBalanceCommand.id)
                 .findFirst();
         if (command.isPresent()) {
             return Optional.of((long) command.get().id);
         }
-
-        String newBalanceName = "SAVINGS " + currency;
-
-        final var newCommand = OpenBalanceCommand.builder()
+        final var newName = "SAVINGS "+currency;
+        final var command = OpenBalanceCommand.builder()
                 .currency(currency)
                 .type(JAR_TYPE)
-                .name(newBalanceName)
-                .icon(new Icon("\uD83C\uDF4D"))
+                .name(newName)
+                .icon(new Icon("EMOJI","\uD83C\uDF4D"))
                 .build();
 
-        final var newJar = balanceAPI.createBalanceJar(profileId, token, newCommand);
-        return newJar.map(balanceValue -> (long) balanceValue.id);
+        final var newBalance = balanceAPI.createBalanceJar(profileId,token,command);
+        if (newBalance.isPresent()){
+            return Long.valueOf(newBalance.get().id);
+        }
+        return null;
     }
 }

@@ -1,15 +1,15 @@
 package com.transferwise.acorn.models;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 @Builder
-@AllArgsConstructor
-@JsonSerialize
 @Data
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class Icon {
-	private final String type = "EMOJI";
+	private String type;
 	private String value;
 }
