@@ -25,9 +25,9 @@ public class BalanceAPI {
     public Optional<BalanceResponse> makeBalanceToBalanceTransfer(String token,
                                                                   double value,
                                                                   String currency,
-                                                                  int profileId,
-                                                                  int sourceBalanceId,
-                                                                  int targetBalanceId) {
+                                                                  Long profileId,
+                                                                  Long sourceBalanceId,
+                                                                  Long targetBalanceId) {
         final String BALANCE_TRANSFER_URL = BASE_URL + "/gateway/v2/profiles/" + profileId + "/balance-movements";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -87,8 +87,8 @@ public class BalanceAPI {
     @Builder
     private static class BalanceTransferPayload {
         private final MoneyValue amount;
-        private final int sourceBalanceId;
-        private final int targetBalanceId;
+        private final Long sourceBalanceId;
+        private final Long targetBalanceId;
     }
 
     @JsonSerialize
