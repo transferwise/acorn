@@ -26,14 +26,8 @@ public class BalanceService {
         final Long profileId = balanceCredit.getResource().getProfileId();
 
         final var activeBalances = balanceAPI.findActiveBalances(token,profileId);
-        if (activeBalances.isEmpty()){
-            return;
-        }
-        System.out.println(activeBalances);
-
 
         final String currency = balanceCredit.getCurrency();
-        // TODO: is this correct?
         final Long sourceJarId = balanceCredit.getResource().getId();
         final Long targetJarId = getTargetJarId(activeBalances.get());
 
@@ -48,7 +42,7 @@ public class BalanceService {
     }
 
 
-    private Long getTargetJarId(List<OpenBalanceCommand> balances) {
+    private Long getTargetJarId(List<BalanceValue> balances) {
         // TODO
         int targerJarId = -1;
 

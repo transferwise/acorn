@@ -5,6 +5,7 @@ import com.transferwise.acorn.models.BalanceResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -55,7 +56,7 @@ public class BalanceAPI {
         return Optional.empty();
     }
 
-    public Optional<List<OpenBalanceCommand>> findActiveBalances(String token,
+    public Optional<List<BalanceValue>> findActiveBalances(String token,
                                                            Long profileId) {
 
         final String BALANCES_URL = BASE_URL + "/gateway/v4/profiles/" + profileId + "/balances?types=SAVINGS,STANDARD";
@@ -67,21 +68,12 @@ public class BalanceAPI {
         headers.set("X-idempotence-uuid", String.valueOf(UUID.randomUUID()));
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-
         var entity = new HttpEntity<>(headers);
 
+        ResponseEntity<List<BalanceValue>> responseEntity = restTemplate.exchange(BALANCES_URL, HttpMethod.GET, entity, new ParameterizedTypeReference<List<BalanceValue>>() {});
 
-
-        /*
-        ResponseEntity<BalancesResponse> responseEntity = restTemplate.
-                getForEntity(BALANCES_URL, entity, BalancesResponse.class);
-         */
-
-        ResponseEntity<Object> responseEntity = restTemplate.exchange(
-                BALANCES_URL, HttpMethod.GET, entity, Object.class);
-
-        if (responseEntity.getStatusCode() == HttpStatus.CREATED) {
-            List<OpenBalanceCommand> body = (List<OpenBalanceCommand>) responseEntity.getBody();
+        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+            List<BalanceValue> body = responseEntity.getBody();
             return Optional.of(body);
         }
         return Optional.empty();

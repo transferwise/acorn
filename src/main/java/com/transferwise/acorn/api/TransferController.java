@@ -17,7 +17,7 @@ public class TransferController {
     private final BalanceService transferService;
 
     @PostMapping("/transfer")
-    public ResponseEntity transfer(@RequestBody BalanceCreditEvent payload, HttpHeaders httpHeaders) {
+    public ResponseEntity transfer(@RequestBody BalanceCreditEvent payload, @RequestHeader HttpHeaders httpHeaders) {
         if (isRealBalanceEvent(payload, httpHeaders)) {
             transferService.handleIncomingDepositWebhooksEvent(payload.getData());
         }
