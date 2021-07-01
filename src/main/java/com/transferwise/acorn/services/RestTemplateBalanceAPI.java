@@ -6,6 +6,7 @@ import com.transferwise.acorn.models.OpenBalanceCommand;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -58,7 +59,7 @@ public class RestTemplateBalanceAPI implements BalanceAPI {
 	}
 
 	@Override
-	public Optional<List<com.transferwise.acorn.services.OpenBalanceCommand>> findActiveBalances(String token,
+	public Optional<List<BalanceValue>> findActiveBalances(String token,
 	                                                                                             Long profileId) {
 
 		final String BALANCES_URL = BASE_URL + "/gateway/v4/profiles/" + profileId + "/balances?types=SAVINGS,STANDARD";
@@ -73,25 +74,17 @@ public class RestTemplateBalanceAPI implements BalanceAPI {
 
 		var entity = new HttpEntity<>(headers);
 
+		ResponseEntity<List<BalanceValue>> responseEntity = restTemplate.exchange(BALANCES_URL, HttpMethod.GET, entity, new ParameterizedTypeReference<List<BalanceValue>>() {});
 
-
-        /*
-        ResponseEntity<BalancesResponse> responseEntity = restTemplate.
-                getForEntity(BALANCES_URL, entity, BalancesResponse.class);
-         */
-
-		ResponseEntity<Object> responseEntity = restTemplate.exchange(
-				BALANCES_URL, HttpMethod.GET, entity, Object.class);
-
-		if (responseEntity.getStatusCode() == HttpStatus.CREATED) {
-			List<com.transferwise.acorn.services.OpenBalanceCommand> body = (List<com.transferwise.acorn.services.OpenBalanceCommand>) responseEntity.getBody();
+		if (responseEntity.getStatusCode() == HttpStatus.OK) {
+			List<BalanceValue> body = responseEntity.getBody();
 			return Optional.of(body);
 		}
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<com.transferwise.acorn.services.OpenBalanceCommand> createBalanceJar(OpenBalanceCommand openBalanceCommand) {
+	public Optional<BalanceValue> createBalanceJar(OpenBalanceCommand openBalanceCommand) {
 		return Optional.empty();
 	}
 
