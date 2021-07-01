@@ -16,7 +16,7 @@ public interface BalanceAPI {
                                                                   Long targetBalanceId);
 
     Optional<List<BalanceValue>> findActiveBalances(String token,
-                                                           Long profileId);
+                                                    Long profileId);
 
     Optional<BalanceValue> createBalanceJar(Long profileId, String token, OpenBalanceCommand openBalanceCommand);
 }

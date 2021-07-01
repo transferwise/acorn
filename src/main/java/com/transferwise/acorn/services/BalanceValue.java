@@ -1,7 +1,6 @@
 package com.transferwise.acorn.services;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
