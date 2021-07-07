@@ -1,0 +1,19 @@
+version: '3.7'
+services:
+  acorn-api:
+    image: acorn-api
+    container_name: acorn-api
+    ports:
+      - 50550:50550
+    environment:
+      JAVA_OPTS: "-Dspring.profiles.active=development"
+      WISE_TOKEN: ${WISE_TOKEN}
+
+  ngrok:
+    image: nginx
+    volumes:
+      - ../ngrok-exec:/ngrok-exec/
+    command: /ngrok-exec/ngrok http acorn-api:50550 -config=/ngrok-exec/ngrok.conf
+    ports:
+      - 4040:4040
+

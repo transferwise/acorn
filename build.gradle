@@ -1,0 +1,63 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:2.5.2")
+		classpath('se.transmode.gradle:gradle-docker:1.2')
+		classpath('gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.22.1')
+	}
+}
+
+
+plugins {
+	id 'org.springframework.boot' version '2.5.2'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+
+apply plugin: 'com.palantir.docker'
+
+group = 'com.transferwise'
+version = '0.0.1'
+sourceCompatibility = '15'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+test {
+	useJUnitPlatform()
+}
+
+bootJar {
+	archiveFileName = 'acorn-api-service.jar'
+}
+
+docker {
+	name "acorn-api"
+	copySpec.from(tasks.bootJar.outputs).into("jars")
+	buildArgs([
+			'JAR_FILE': "jars/${bootJar.archiveFileName.get()}",
+			'VERSION' : "${System.properties['docker.version']}",
+	])
+	setDockerfile(new File("docker/Dockerfile"))
+}
